@@ -1,36 +1,93 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
+// Calculator program
 func main() {
-	poodle := Dog{"Poodle", 10, "Woof!"}
-	fmt.Println(poodle)
-	fmt.Printf("%+v\n", poodle)
-	fmt.Printf("Breed: %v\nWeight: %v\n", poodle.Breed, poodle.Weight)
+	// get input values
+	value1 := getInputValue(1)
+	value2 := getInputValue(1)
 
-	poodle.Speak()
-	poodle.Sound = "Arf!"
-	poodle.Speak()
-	poodle.SpeakThreeTimes()
-	poodle.SpeakThreeTimes()
+	// get operator
+	operator := getInputOperator()
+
+	// make calculation
+	result := calculate(operator, value1, value2)
+
+	// format the result
+	fmt.Printf("The result is %.2f", result)
 }
 
-// Dog is a struct
-type Dog struct {
-	Breed  string
-	Weight int
-	Sound  string
+func calculate(operator string, value1, value2 float64) float64 {
+	switch operator {
+	case "-":
+		return value1 - value2
+	case "+":
+		return value1 + value2
+	case "*":
+		return value1 * value2
+	case "/":
+		return value1 * value2
+	default:
+		panic("Invalid Operator")
+	}
+}
+func getInputValue(num int) float64 {
+	// prompt the user to enter a value
+	print("Enter value", num, ": ")
+
+	// read the value
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+
+	// convert the input to a number
+	value, err := strconv.ParseFloat(strings.TrimSpace(input), 64)
+
+	if err != nil {
+		panic("The value is not a number")
+	}
+
+	return value
 }
 
-// Speak is how the dog speaks
-func (d Dog) Speak() {
-	fmt.Println(d.Sound)
+func getInputOperator() string {
+	// prompt the user to enter a value
+	print("Enter an operator (+, -, *): ")
+
+	// read the value
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+
+	// convert the input to a number
+	operator := strings.TrimSpace(input)
+
+	allowedOperators := []string{"+", "-", "*", "/"}
+
+	if InArray(operator, allowedOperators) == -1 {
+		panic("Invalid Operator, it must be one of the following values: [*, - , +]")
+	}
+
+	return operator
 }
 
-// SpeakThreeTimes is how the dog speaks loudly
-func (d Dog) SpeakThreeTimes() {
-	d.Sound = fmt.Sprintf("%v %v %v", d.Sound, d.Sound, d.Sound)
-	fmt.Println(d.Sound)
+// InArray check of a given value is in an array
+func InArray(val interface{}, array interface{}) (index int) {
+	values := reflect.ValueOf(array)
+
+	if reflect.TypeOf(array).Kind() == reflect.Slice || values.Len() > 0 {
+		for i := 0; i < values.Len(); i++ {
+			if reflect.DeepEqual(val, values.Index(i).Interface()) {
+				return i
+			}
+		}
+	}
+
+	return -1
 }
