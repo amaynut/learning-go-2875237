@@ -2,35 +2,43 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
 )
 
+// read an write files
 func main() {
-	poodle := Dog{"Poodle", 10, "Woof!"}
-	fmt.Println(poodle)
-	fmt.Printf("%+v\n", poodle)
-	fmt.Printf("Breed: %v\nWeight: %v\n", poodle.Breed, poodle.Weight)
 
-	poodle.Speak()
-	poodle.Sound = "Arf!"
-	poodle.Speak()
-	poodle.SpeakThreeTimes()
-	poodle.SpeakThreeTimes()
+	content := "Writing and reading files with Go!"
+	fileName := "./fromString.txt"
+	// create a file
+	file, err := os.Create(fileName)
+	checkError(err)
+	// write to it
+	length, err := io.WriteString(file, content)
+	checkError(err)
+	fmt.Printf("Wrote a file with %v characters\n", length)
+	// wait (defer) until the write operation is done then close the file
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
+
+	// read the file
+	defer readFile(fileName)
 }
 
-// Dog is a struct
-type Dog struct {
-	Breed  string
-	Weight int
-	Sound  string
+func readFile(fileName string) {
+	data, err := ioutil.ReadFile(fileName)
+	checkError(err)
+	println("The text in the file is: ", string(data))
 }
-
-// Speak is how the dog speaks
-func (d Dog) Speak() {
-	fmt.Println(d.Sound)
-}
-
-// SpeakThreeTimes is how the dog speaks loudly
-func (d Dog) SpeakThreeTimes() {
-	d.Sound = fmt.Sprintf("%v %v %v", d.Sound, d.Sound, d.Sound)
-	fmt.Println(d.Sound)
+func checkError(err error) {
+	if err != nil {
+		println("An error occurred")
+		panic(err)
+	}
 }
